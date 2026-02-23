@@ -313,9 +313,15 @@
             player.y += (player.targetY - player.y) * 0.2;
             player.y = Math.max(0, Math.min(canvas.height - paddleHeight, player.y));
             
-            // Computer AI
-            const targetY = ball.y - paddleHeight / 2;
-            computer.y += (targetY - computer.y) * 0.08;
+            // Computer AI - only tracks when ball is moving toward computer
+            // Added delay and error margin for fair gameplay
+            if (ball.dx > 0) {  // Only react when ball coming toward computer
+                const targetY = ball.y - paddleHeight / 2;
+                // Slower tracking (0.04 vs 0.2 for player)
+                // Add random error to make it beatable
+                const errorMargin = (Math.random() - 0.5) * 30;
+                computer.y += (targetY + errorMargin - computer.y) * 0.04;
+            }
             computer.y = Math.max(0, Math.min(canvas.height - paddleHeight, computer.y));
             
             // Ball
