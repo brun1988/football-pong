@@ -303,8 +303,14 @@
         // Responsive canvas
         function resizeCanvas() {
             const container = document.getElementById('gameContainer');
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
+            if (container.clientWidth > 0 && container.clientHeight > 0) {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            } else {
+                // Default dimensions if not yet rendered
+                canvas.width = 400;
+                canvas.height = 600;
+            }
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
