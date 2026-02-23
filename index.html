@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>Football Pong</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap');
@@ -11,166 +11,167 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #1a472a;
         }
         
         body {
-            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 50%, #1a472a 100%);
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             font-family: 'Oswald', sans-serif;
-            overflow: hidden;
         }
         
-        .grass {
-            position: fixed;
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            max-height: 700px;
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            border: 3px solid #fff;
+            border-radius: 8px;
+            background: #2d5a3d;
+        }
+        
+        #scoreBoard {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+            font-size: 2.5rem;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+            z-index: 10;
+        }
+        
+        #menu {
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                repeating-linear-gradient(
-                    90deg,
-                    transparent,
-                    transparent 50px,
-                    rgba(255,255,255,0.03) 50px,
-                    rgba(255,255,255,0.03) 100px
-                ),
-                linear-gradient(180deg, #2d5a3d 0%, #1a472a 100%);
-            z-index: -1;
+            background: rgba(26, 71, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
         }
         
         h1 {
             color: #fff;
-            font-size: 3rem;
+            font-size: 2rem;
             text-transform: uppercase;
-            letter-spacing: 0.3em;
+            letter-spacing: 0.2em;
             text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
-        }
-        
-        #gameCanvas {
-            border: 4px solid #fff;
-            border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 0 100px rgba(0,0,0,0.3);
-        }
-        
-        .score {
-            display: flex;
-            justify-content: space-between;
-            width: 800px;
-            margin-bottom: 15px;
-            font-size: 2.5rem;
-            color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-        
-        .score span {
-            padding: 10px 30px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 8px;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-        
-        .controls {
-            margin-top: 20px;
-            color: #fff;
-            font-size: 1.2rem;
-            opacity: 0.8;
-        }
-        
-        .mode-select {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            text-align: center;
         }
         
         button {
             font-family: 'Oswald', sans-serif;
-            font-size: 1.2rem;
-            padding: 12px 30px;
-            margin: 0 10px;
+            font-size: 1.3rem;
+            padding: 15px 40px;
+            margin: 10px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             transition: all 0.3s;
-        }
-        
-        .btn-player {
             background: #4CAF50;
             color: white;
         }
         
-        .btn-computer {
-            background: #2196F3;
-            color: white;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        }
-        
         button:active {
-            transform: translateY(0);
+            transform: scale(0.95);
         }
         
-        .menu {
+        .controls-hint {
             position: absolute;
-            top: 50%;
+            bottom: 20px;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
             text-align: center;
-            z-index: 10;
         }
         
-        .hidden {
-            display: none !important;
+        #pauseBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            font-size: 1rem;
+            z-index: 15;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
-    <div class="grass"></div>
-    
-    <div class="menu" id="menu">
-        <h1>⚽ Football Pong ⚽</h1>
-        <div class="mode-select">
-            <button class="btn-player" onclick="startGame('player')">1 Player</button>
-            <button class="btn-computer" onclick="startGame('computer')">vs Computer</button>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="scoreBoard">
+            <span id="playerScore">0</span>
+            <span id="computerScore">0</span>
         </div>
-    </div>
-    
-    <div class="score hidden" id="scoreBoard">
-        <span id="playerScore">0</span>
-        <span id="computerScore">0</span>
-    </div>
-    
-    <canvas id="gameCanvas" width="800" height="500"></canvas>
-    
-    <div class="controls hidden" id="controls">
-        Move paddle: <strong>Arrow Keys</strong> or <strong>W/S</strong> | Press <strong>Space</strong> to pause
+        
+        <button id="pauseBtn" onclick="togglePause()">⏸</button>
+        
+        <div id="menu">
+            <h1>⚽ Football Pong ⚽</h1>
+            <button onclick="startGame()">Play</button>
+            <div class="controls-hint">
+                Touch left side to move up<br>
+                Touch right side to move down
+            </div>
+        </div>
     </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
+        // Responsive canvas
+        function resizeCanvas() {
+            const container = document.getElementById('gameContainer');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
         // Game state
-        let gameMode = 'computer';
         let gameRunning = false;
         let paused = false;
         
-        // Sounds using Web Audio API
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Audio
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
         
-        function playSound(freq, duration, type = 'sine') {
+        function playSound(freq, duration) {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = type;
             osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
@@ -178,106 +179,88 @@
             osc.stop(audioCtx.currentTime + duration);
         }
         
-        function playPaddleHit() { playSound(400, 0.1); }
-        function playGoal() { 
-            playSound(200, 0.3);
-            setTimeout(() => playSound(300, 0.3), 100);
-            setTimeout(() => playSound(400, 0.4), 200);
-        }
-        function playWallHit() { playSound(150, 0.1, 'square'); }
-        
-        // Paddle
+        // Game objects
         const paddleWidth = 15;
         const paddleHeight = 80;
         
         const player = {
-            x: 30,
-            y: canvas.height / 2 - paddleHeight / 2,
+            x: 20,
+            y: 0,
             score: 0,
-            dy: 0,
-            speed: 8
+            targetY: 0
         };
         
         const computer = {
-            x: canvas.width - 30 - paddleWidth,
-            y: canvas.height / 2 - paddleHeight / 2,
+            x: 0,
+            y: 0,
             score: 0,
-            speed: 5,
-            difficulty: 0.1
+            speed: 4
         };
         
-        // Ball (football)
         const ball = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            radius: 12,
+            x: 0,
+            y: 0,
+            radius: 10,
             dx: 0,
             dy: 0,
-            speed: 7,
-            rotation: 0
+            speed: 5
         };
         
-        // Draw football pattern
-        function drawBall() {
-            ctx.save();
-            ctx.translate(ball.x, ball.y);
-            ctx.rotate(ball.rotation);
-            
-            // Ball base (white)
-            ctx.beginPath();
-            ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
-            ctx.fillStyle = '#fff';
-            ctx.fill();
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            // Football pattern (pentagons)
-            ctx.fillStyle = '#000';
-            for (let i = 0; i < 5; i++) {
-                const angle = (i * 72 - 90) * Math.PI / 180;
-                const px = Math.cos(angle) * ball.radius * 0.6;
-                const py = Math.sin(angle) * ball.radius * 0.6;
-                ctx.beginPath();
-                ctx.arc(px, py, 4, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            
-            ctx.restore();
+        function initPositions() {
+            player.x = 20;
+            player.y = canvas.height / 2 - paddleHeight / 2;
+            computer.x = canvas.width - 20 - paddleWidth;
+            computer.y = canvas.height / 2 - paddleHeight / 2;
+            resetBall();
         }
         
-        // Draw goal post style paddle
-        function drawPaddle(x, y, isPlayer) {
-            // Goal post effect
-            ctx.fillStyle = isPlayer ? '#4CAF50' : '#2196F3';
-            
-            // Main paddle
-            ctx.fillRect(x, y, paddleWidth, paddleHeight);
-            
-            // Posts
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(x, y, paddleWidth, paddleHeight);
-            
-            // Net pattern
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < paddleHeight; i += 10) {
-                ctx.beginPath();
-                ctx.moveTo(x, y + i);
-                ctx.lineTo(x + paddleWidth, y + i);
-                ctx.stroke();
-            }
+        function resetBall() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.speed = 5;
+            const angle = (Math.random() - 0.5) * Math.PI / 3;
+            ball.dx = (Math.random() > 0.5 ? 1 : -1) * ball.speed * Math.cos(angle);
+            ball.dy = ball.speed * Math.sin(angle);
         }
         
-        // Draw football pitch markings
+        // Touch controls
+        let touching = false;
+        let touchY = 0;
+        
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touching = true;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            touchY = touch.clientY - rect.top;
+        });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (touching) {
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                touchY = touch.clientY - rect.top;
+            }
+        });
+        
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            touching = false;
+        });
+        
+        // Mouse controls for testing
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            touchY = e.clientY - rect.top;
+        });
+        
+        canvas.addEventListener('mousedown', () => touching = true);
+        canvas.addEventListener('mouseup', () => touching = false);
+        
         function drawPitch() {
-            // Center circle
-            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(canvas.width / 2, canvas.height / 2, 70, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
             
             // Center line
             ctx.beginPath();
@@ -285,83 +268,66 @@
             ctx.lineTo(canvas.width / 2, canvas.height);
             ctx.stroke();
             
-            // Center dot
-            ctx.fillStyle = '#fff';
+            // Center circle
             ctx.beginPath();
-            ctx.arc(canvas.width / 2, canvas.height / 2, 5, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Goal areas
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx.lineWidth = 2;
-            
-            // Left goal area
-            ctx.strokeRect(0, canvas.height/2 - 90, 60, 180);
-            // Right goal area
-            ctx.strokeRect(canvas.width - 60, canvas.height/2 - 90, 60, 180);
+            ctx.arc(canvas.width / 2, canvas.height / 2, 40, 0, Math.PI * 2);
+            ctx.stroke();
         }
         
-        // Draw goals (nets)
-        function drawGoals() {
-            // Left goal
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(0, canvas.height/2 - 60, 5, 120);
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.stroke();
             
-            // Right goal
-            ctx.strokeRect(canvas.width - 5, canvas.height/2 - 60, 5, 120);
-            
-            // Net pattern
-            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < 120; i += 8) {
+            // Football pattern
+            ctx.fillStyle = '#000';
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * 72 - 90) * Math.PI / 180;
+                const px = ball.x + Math.cos(angle) * ball.radius * 0.5;
+                const py = ball.y + Math.sin(angle) * ball.radius * 0.5;
                 ctx.beginPath();
-                ctx.moveTo(0, canvas.height/2 - 60 + i);
-                ctx.lineTo(5, canvas.height/2 - 60 + i);
-                ctx.stroke();
-                
-                ctx.beginPath();
-                ctx.moveTo(canvas.width - 5, canvas.height/2 - 60 + i);
-                ctx.lineTo(canvas.width, canvas.height/2 - 60 + i);
-                ctx.stroke();
+                ctx.arc(px, py, 3, 0, Math.PI * 2);
+                ctx.fill();
             }
         }
         
-        function resetBall() {
-            ball.x = canvas.width / 2;
-            ball.y = canvas.height / 2;
-            ball.speed = 7;
-            const angle = (Math.random() - 0.5) * Math.PI / 3;
-            ball.dx = (Math.random() > 0.5 ? 1 : -1) * ball.speed * Math.cos(angle);
-            ball.dy = ball.speed * Math.sin(angle);
+        function drawPaddle(x, y, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, paddleWidth, paddleHeight);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, paddleWidth, paddleHeight);
         }
         
         function update() {
             if (!gameRunning || paused) return;
             
-            // Player movement
-            player.y += player.dy;
+            // Player follows touch
+            if (touching) {
+                player.targetY = touchY - paddleHeight / 2;
+            }
+            player.y += (player.targetY - player.y) * 0.2;
             player.y = Math.max(0, Math.min(canvas.height - paddleHeight, player.y));
             
             // Computer AI
-            if (gameMode === 'computer') {
-                const targetY = ball.y - paddleHeight / 2;
-                computer.y += (targetY - computer.y) * computer.difficulty;
-                computer.y = Math.max(0, Math.min(canvas.height - paddleHeight, computer.y));
-            }
+            const targetY = ball.y - paddleHeight / 2;
+            computer.y += (targetY - computer.y) * 0.08;
+            computer.y = Math.max(0, Math.min(canvas.height - paddleHeight, computer.y));
             
-            // Ball movement
+            // Ball
             ball.x += ball.dx;
             ball.y += ball.dy;
-            ball.rotation += ball.dx * 0.05;
             
-            // Wall collision
+            // Walls
             if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
                 ball.dy *= -1;
-                playWallHit();
+                playSound(150, 0.1);
             }
             
-            // Paddle collision
             // Player paddle
             if (ball.dx < 0 && 
                 ball.x - ball.radius < player.x + paddleWidth &&
@@ -370,8 +336,8 @@
                 ball.y < player.y + paddleHeight) {
                 ball.dx *= -1;
                 ball.x = player.x + paddleWidth + ball.radius;
-                ball.speed += 0.5;
-                playPaddleHit();
+                ball.speed += 0.3;
+                playSound(400, 0.1);
             }
             
             // Computer paddle
@@ -382,20 +348,20 @@
                 ball.y < computer.y + paddleHeight) {
                 ball.dx *= -1;
                 ball.x = computer.x - ball.radius;
-                ball.speed += 0.5;
-                playPaddleHit();
+                ball.speed += 0.3;
+                playSound(400, 0.1);
             }
             
-            // Goal scoring
+            // Goals
             if (ball.x < 0) {
                 computer.score++;
-                playGoal();
+                playSound(300, 0.3);
                 updateScore();
                 resetBall();
             }
             if (ball.x > canvas.width) {
                 player.score++;
-                playGoal();
+                playSound(300, 0.3);
                 updateScore();
                 resetBall();
             }
@@ -407,21 +373,19 @@
         }
         
         function draw() {
-            // Clear with grass green
             ctx.fillStyle = '#2d5a3d';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             drawPitch();
-            drawGoals();
-            drawPaddle(player.x, player.y, true);
-            drawPaddle(computer.x, computer.y, false);
+            drawPaddle(player.x, player.y, '#4CAF50');
+            drawPaddle(computer.x, computer.y, '#2196F3');
             drawBall();
             
             if (paused) {
                 ctx.fillStyle = 'rgba(0,0,0,0.5)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#fff';
-                ctx.font = '48px Oswald';
+                ctx.font = '36px Oswald';
                 ctx.textAlign = 'center';
                 ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
             }
@@ -433,43 +397,22 @@
             requestAnimationFrame(gameLoop);
         }
         
-        function startGame(mode) {
-            gameMode = mode;
-            document.getElementById('menu').classList.add('hidden');
-            document.getElementById('scoreBoard').classList.remove('hidden');
-            document.getElementById('controls').classList.remove('hidden');
-            
-            // Resume audio context
+        function startGame() {
+            document.getElementById('menu').style.display = 'none';
             audioCtx.resume();
-            
             gameRunning = true;
             player.score = 0;
             computer.score = 0;
             updateScore();
-            resetBall();
+            initPositions();
         }
         
-        // Controls
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
-                player.dy = -player.speed;
-            }
-            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
-                player.dy = player.speed;
-            }
-            if (e.key === ' ') {
-                paused = !paused;
-            }
-        });
+        function togglePause() {
+            paused = !paused;
+        }
         
-        document.addEventListener('keyup', (e) => {
-            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || 
-                e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
-                player.dy = 0;
-            }
-        });
-        
-        // Start the game loop
+        // Start
+        initPositions();
         gameLoop();
     </script>
 </body>
