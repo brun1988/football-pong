@@ -257,7 +257,7 @@
         
         <div id="scoreBoard">
             <div class="score">You: <span id="playerScore">0</span></div>
-            <div class="score">CPU: <span id="computerScore">0</span></div>
+            <div class="score">CPU: <span id="cpuScore">0</span></div>
         </div>
         
         <div id="timer">60</div>
@@ -320,7 +320,7 @@
         let timeLeft = 60;
         let timerInterval = null;
         let playerScore = 0;
-        let computerScore = 0;
+        let cpuScore = 0;
         let streak = 0;
         let bestStreak = 0;
         let bonusPoints = 0;
@@ -539,8 +539,8 @@
             
             // Goals
             if (ball.x < 0) {
-                computerScore++;
-                document.getElementById('computerScore').textContent = computerScore;
+                cpuScore++;
+                document.getElementById('cpuScore').textContent = cpuScore;
                 streak = 0;
                 updateStreak();
                 resetBall();
@@ -602,13 +602,13 @@
             audioCtx.resume();
             gameRunning = true;
             playerScore = 0;
-            computerScore = 0;
+            cpuScore = 0;
             streak = 0;
             bestStreak = 0;
             bonusPoints = 0;
             timeLeft = 60;
             document.getElementById('playerScore').textContent = '0';
-            document.getElementById('computerScore').textContent = '0';
+            document.getElementById('cpuScore').textContent = '0';
             document.getElementById('streak').classList.remove('show');
             initPositions();
             
