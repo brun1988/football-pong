@@ -313,21 +313,33 @@
             player.y += (player.targetY - player.y) * 0.2;
             player.y = Math.max(0, Math.min(canvas.height - paddleHeight, player.y));
             
-            // Computer AI - completely random until ball comes toward it
-            // ONLY reacts AFTER player hits ball toward computer
+            // Computer AI - completely rewritten for fair gameplay
+            // State-based: idle, tracking, or returning
             
-            if (ball.dx > 0 && ball.x > canvas.width * 0.5) {
+            const ballComingToComputer = ball.dx > 0 && ball.x > canvas.width * 0.4;
+            const ballGoingToPlayer = ball.dx < 0;
+            
+            if (ballGoingToPlayer) {
+                // Ball is going toward player - computer should move RANDOMLY
+                // Not tracking at all - just random idle movement
+                computer.y += (Math.random() - 0.5) * 8;
+            } else if (ballComingToComputer) {
                 // Ball is coming toward computer - NOW it tries to save
-                // But with delay and error
-                const reactionDelay = 0.15; // Only catch up 15% of the way
+                // But with IMPERFECT tracking - slow and with errors
                 const targetY = ball.y - paddleHeight / 2;
-                computer.y += (targetY - computer.y) * reactionDelay;
+                // Very slow catch-up (0.08 = very sluggish)
+                computer.y += (targetY - computer.y) * 0.08;
+                // Sometimes overshoot or undershoot
+                if (Math.random() < 0.2) {
+                    computer.y += (Math.random() - 0.5) * 40; // Occasional big mistake
+                }
             } else {
-                // Ball going toward player OR not in play - move randomly
-                // Just gently sway up and down randomly
-                computer.y += (Math.random() - 0.5) * 2;
+                // Ball in middle area - random idle movement
+                computer.y += (Math.random() - 0.5) * 4;
             }
-            computer.y = Math.max(0, Math.min(canvas.height - paddleHeight, computer.y));
+            
+            // Keep in bounds
+            computer.y = Math.max(paddleHeight/2, Math.min(canvas.height - paddleHeight/2, computer.y));
             
             // Ball
             ball.x += ball.dx;
