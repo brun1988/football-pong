@@ -55,13 +55,89 @@
             transform: translateX(-50%);
             display: flex;
             gap: 30px;
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: #fff;
             text-shadow: 0 2px 10px rgba(0,0,0,0.7);
             z-index: 10;
         }
         
-        #menu {
+        #scoreBoard .score {
+            background: rgba(0,0,0,0.5);
+            padding: 5px 15px;
+            border-radius: 8px;
+        }
+        
+        #timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.8rem;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+            z-index: 10;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 15px;
+            border-radius: 8px;
+        }
+        
+        #timer.warning {
+            color: #ff6b6b;
+            animation: pulse 0.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        #streak {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2rem;
+            color: #FFD700;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        #streak.show {
+            opacity: 1;
+            animation: streakGlow 0.5s infinite alternate;
+        }
+        
+        @keyframes streakGlow {
+            from { text-shadow: 0 0 10px #FFD700; }
+            to { text-shadow: 0 0 30px #FFD700, 0 0 50px #FFA500; }
+        }
+        
+        #bonusPopup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: #FFD700;
+            text-shadow: 0 0 20px #FFD700, 0 0 40px #FFA500;
+            z-index: 30;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        #bonusPopup.show {
+            animation: bonusPop 1.5s forwards;
+        }
+        
+        @keyframes bonusPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+        }
+        
+        #menu, #gameOver {
             position: absolute;
             top: 0;
             left: 0;
@@ -73,6 +149,12 @@
             align-items: center;
             justify-content: center;
             z-index: 20;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        #gameOver {
+            display: none;
         }
         
         h1 {
@@ -81,11 +163,11 @@
             text-transform: uppercase;
             letter-spacing: 0.2em;
             text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
         }
         
-        button {
+        .btn {
             font-family: 'Oswald', sans-serif;
             font-size: 1.3rem;
             padding: 15px 40px;
@@ -100,28 +182,70 @@
             color: white;
         }
         
-        button:active {
+        .btn:active {
             transform: scale(0.95);
         }
         
-        .controls-hint {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255,255,255,0.7);
-            font-size: 0.9rem;
+        .info {
+            color: #fff;
+            font-size: 1rem;
+            margin: 10px 0;
             text-align: center;
         }
         
-        #pauseBtn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 8px 15px;
-            font-size: 1rem;
-            z-index: 15;
-            opacity: 0.7;
+        input[type="text"] {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            text-align: center;
+            margin: 10px 0;
+            width: 200px;
+        }
+        
+        .highscores {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .highscores h2 {
+            color: #FFD700;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .score-entry {
+            display: flex;
+            justify-content: space-between;
+            color: #fff;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .score-entry:first-child {
+            color: #FFD700;
+            font-size: 1.2rem;
+        }
+        
+        .controls-hint {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .streak-info {
+            color: #FFD700;
+            font-size: 0.9rem;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -130,18 +254,42 @@
         <canvas id="gameCanvas"></canvas>
         
         <div id="scoreBoard">
-            <span id="playerScore">0</span>
-            <span id="computerScore">0</span>
+            <div class="score">You: <span id="playerScore">0</span></div>
+            <div class="score">CPU: <span id="computerScore">0</span></div>
         </div>
         
-        <button id="pauseBtn" onclick="togglePause()">⏸</button>
+        <div id="timer">60</div>
+        <div id="streak">🔥 Streak: <span id="streakCount">0</span> 🔥</div>
+        <div id="bonusPopup">+50 BONUS!</div>
         
         <div id="menu">
             <h1>⚽ Football Pong ⚽</h1>
-            <button onclick="startGame()">Play</button>
+            <p class="info">60 Second Challenge!</p>
+            <p class="info" style="color: #FFD700;">10+ Streak = +50 Bonus!</p>
+            <button class="btn" onclick="startGame()">Play Now</button>
             <div class="controls-hint">
                 Touch left side to move up<br>
                 Touch right side to move down
+            </div>
+            <div class="highscores" id="highscores">
+                <h2>🏆 High Scores 🏆</h2>
+                <div id="scoreList"></div>
+            </div>
+        </div>
+        
+        <div id="gameOver">
+            <h1>Time's Up!</h1>
+            <p class="info" style="font-size: 1.5rem;">Your Score: <span id="finalScore" style="color: #FFD700; font-size: 2rem;">0</span></p>
+            <p class="info" id="bonusText" style="color: #FFD700; display: none;">Bonus Points: +<span id="bonusPoints">0</span></p>
+            <p class="info">Best Streak: <span id="bestStreak">0</span></p>
+            <br>
+            <p class="info">Enter your name:</p>
+            <input type="text" id="playerName" placeholder="Your Name" maxlength="15">
+            <button class="btn" onclick="saveScore()">Save Score</button>
+            <button class="btn" onclick="showMenu()">Menu</button>
+            <div class="highscores" id="highscoresEnd">
+                <h2>🏆 High Scores 🏆</h2>
+                <div id="scoreListEnd"></div>
             </div>
         </div>
     </div>
@@ -161,7 +309,16 @@
         
         // Game state
         let gameRunning = false;
-        let paused = false;
+        let timeLeft = 60;
+        let timerInterval = null;
+        let playerScore = 0;
+        let computerScore = 0;
+        let streak = 0;
+        let bestStreak = 0;
+        let bonusPoints = 0;
+        
+        // High scores
+        let highScores = JSON.parse(localStorage.getItem('footballPongHighScores')) || [];
         
         // Audio
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -179,6 +336,18 @@
             osc.stop(audioCtx.currentTime + duration);
         }
         
+        function playGoal() { 
+            playSound(300, 0.3);
+            setTimeout(() => playSound(400, 0.3), 100);
+            setTimeout(() => playSound(500, 0.4), 200);
+        }
+        
+        function playBonus() {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => playSound(600 + i * 100, 0.2), i * 100);
+            }
+        }
+        
         // Game objects
         const paddleWidth = 15;
         const paddleHeight = 80;
@@ -186,15 +355,13 @@
         const player = {
             x: 20,
             y: 0,
-            score: 0,
             targetY: 0
         };
         
         const computer = {
             x: 0,
             y: 0,
-            score: 0,
-            speed: 4
+            speed: 3
         };
         
         const ball = {
@@ -261,14 +428,10 @@
         function drawPitch() {
             ctx.strokeStyle = 'rgba(255,255,255,0.3)';
             ctx.lineWidth = 2;
-            
-            // Center line
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2, 0);
             ctx.lineTo(canvas.width / 2, canvas.height);
             ctx.stroke();
-            
-            // Center circle
             ctx.beginPath();
             ctx.arc(canvas.width / 2, canvas.height / 2, 40, 0, Math.PI * 2);
             ctx.stroke();
@@ -282,8 +445,6 @@
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 2;
             ctx.stroke();
-            
-            // Football pattern
             ctx.fillStyle = '#000';
             for (let i = 0; i < 5; i++) {
                 const angle = (i * 72 - 90) * Math.PI / 180;
@@ -304,51 +465,32 @@
         }
         
         function update() {
-            if (!gameRunning || paused) return;
+            if (!gameRunning) return;
             
-            // Player follows touch
+            // Player movement
             if (touching) {
                 player.targetY = touchY - paddleHeight / 2;
             }
             player.y += (player.targetY - player.y) * 0.2;
             player.y = Math.max(0, Math.min(canvas.height - paddleHeight, player.y));
             
-            // Computer AI - Researched fair Pong AI implementation
-            // Key principles:
-            // 1. Only track when ball is coming toward AI (dx > 0)
-            // 2. Limited movement speed (can't move instantly to ball)
-            // 3. Reaction delay - doesn't track in real-time
-            // 4. Prediction error - even when predicting, add randomness
-            // 5. Maximum speed cap
-            
-            const computerSpeed = 3; // Max pixels per frame - limited!
-            
+            // Fair Computer AI
             if (ball.dx > 0 && ball.x > canvas.width * 0.3) {
-                // Ball coming toward AI - try to track
-                // But only track based on where ball IS, not where it will be
                 const targetY = ball.y;
                 const diff = targetY - (computer.y + paddleHeight / 2);
-                
-                // Move toward ball but capped by max speed
-                if (Math.abs(diff) > computerSpeed) {
-                    computer.y += Math.sign(diff) * computerSpeed;
+                if (Math.abs(diff) > computer.speed) {
+                    computer.y += Math.sign(diff) * computer.speed;
                 } else {
-                    computer.y += diff * 0.1; // Slow down when close
+                    computer.y += diff * 0.1;
                 }
-                
-                // Add IMPERFECTION - 30% chance to NOT move even when should
-                // This makes it miss sometimes
                 if (Math.random() < 0.3) {
-                    computer.y -= Math.sign(diff) * computerSpeed * 0.8;
+                    computer.y -= Math.sign(diff) * computer.speed * 0.8;
                 }
             } else {
-                // Ball going away or at center - return to idle position
                 const idleY = canvas.height / 2;
                 const diff = idleY - computer.y;
                 computer.y += Math.sign(diff) * Math.min(Math.abs(diff), 1);
             }
-            
-            // Clamp to canvas bounds
             computer.y = Math.max(0, Math.min(canvas.height - paddleHeight, computer.y));
             
             // Ball
@@ -383,45 +525,62 @@
                 ball.x = computer.x - ball.radius;
                 ball.speed += 0.3;
                 playSound(400, 0.1);
+                streak = 0;
+                updateStreak();
             }
             
             // Goals
             if (ball.x < 0) {
                 computer.score++;
-                playSound(300, 0.3);
-                updateScore();
+                document.getElementById('computerScore').textContent = computer.score;
+                streak = 0;
+                updateStreak();
                 resetBall();
             }
             if (ball.x > canvas.width) {
-                player.score++;
-                playSound(300, 0.3);
-                updateScore();
+                playerScore++;
+                document.getElementById('playerScore').textContent = playerScore;
+                streak++;
+                
+                // Bonus for 10+ streak
+                if (streak >= 10 && streak % 10 === 0) {
+                    bonusPoints += 50;
+                    showBonus();
+                    playBonus();
+                }
+                
+                updateStreak();
+                playGoal();
                 resetBall();
             }
         }
         
-        function updateScore() {
-            document.getElementById('playerScore').textContent = player.score;
-            document.getElementById('computerScore').textContent = computer.score;
+        function updateStreak() {
+            if (streak > bestStreak) bestStreak = streak;
+            const streakEl = document.getElementById('streak');
+            const streakCountEl = document.getElementById('streakCount');
+            streakCountEl.textContent = streak;
+            if (streak >= 5) {
+                streakEl.classList.add('show');
+            } else {
+                streakEl.classList.remove('show');
+            }
+        }
+        
+        function showBonus() {
+            const bonusEl = document.getElementById('bonusPopup');
+            bonusEl.classList.remove('show');
+            void bonusEl.offsetWidth; // Trigger reflow
+            bonusEl.classList.add('show');
         }
         
         function draw() {
             ctx.fillStyle = '#2d5a3d';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
             drawPitch();
             drawPaddle(player.x, player.y, '#4CAF50');
             drawPaddle(computer.x, computer.y, '#2196F3');
             drawBall();
-            
-            if (paused) {
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#fff';
-                ctx.font = '36px Oswald';
-                ctx.textAlign = 'center';
-                ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
-            }
         }
         
         function gameLoop() {
@@ -434,18 +593,102 @@
             document.getElementById('menu').style.display = 'none';
             audioCtx.resume();
             gameRunning = true;
-            player.score = 0;
-            computer.score = 0;
-            updateScore();
+            playerScore = 0;
+            computerScore = 0;
+            streak = 0;
+            bestStreak = 0;
+            bonusPoints = 0;
+            timeLeft = 60;
+            document.getElementById('playerScore').textContent = '0';
+            document.getElementById('computerScore').textContent = '0';
+            document.getElementById('streak').classList.remove('show');
             initPositions();
+            
+            // Timer
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const timerEl = document.getElementById('timer');
+                timerEl.textContent = timeLeft;
+                if (timeLeft <= 10) {
+                    timerEl.classList.add('warning');
+                } else {
+                    timerEl.classList.remove('warning');
+                }
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
         }
         
-        function togglePause() {
-            paused = !paused;
+        function endGame() {
+            gameRunning = false;
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('gameOver').style.display = 'flex';
+            document.getElementById('finalScore').textContent = playerScore;
+            document.getElementById('bestStreak').textContent = bestStreak;
+            if (bonusPoints > 0) {
+                document.getElementById('bonusText').style.display = 'block';
+                document.getElementById('bonusPoints').textContent = bonusPoints;
+            } else {
+                document.getElementById('bonusText').style.display = 'none';
+            }
         }
         
-        // Start
+        function showMenu() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('menu').style.display = 'flex';
+            displayHighScores();
+        }
+        
+        function saveScore() {
+            const name = document.getElementById('playerName').value.trim() || 'Anonymous';
+            const totalScore = playerScore + bonusPoints;
+            
+            highScores.push({
+                name: name,
+                score: totalScore,
+                streak: bestStreak,
+                date: new Date().toLocaleDateString()
+            });
+            
+            // Sort by score descending
+            highScores.sort((a, b) => b.score - a.score);
+            
+            // Keep top 10
+            highScores = highScores.slice(0, 10);
+            
+            localStorage.setItem('footballPongHighScores', JSON.stringify(highScores));
+            
+            displayHighScores();
+            showMenu();
+        }
+        
+        function displayHighScores() {
+            const listEl = document.getElementById('scoreList');
+            const listEndEl = document.getElementById('scoreListEnd');
+            
+            if (highScores.length === 0) {
+                const html = '<p style="color: #fff; text-align: center;">No scores yet!</p>';
+                listEl.innerHTML = html;
+                listEndEl.innerHTML = html;
+                return;
+            }
+            
+            const html = highScores.map((s, i) => `
+                <div class="score-entry">
+                    <span>${i + 1}. ${s.name}</span>
+                    <span>${s.score} (${s.streak}🔥)</span>
+                </div>
+            `).join('');
+            
+            listEl.innerHTML = html;
+            listEndEl.innerHTML = html;
+        }
+        
+        // Initialize
         initPositions();
+        displayHighScores();
         gameLoop();
     </script>
 </body>
