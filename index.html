@@ -313,14 +313,19 @@
             player.y += (player.targetY - player.y) * 0.2;
             player.y = Math.max(0, Math.min(canvas.height - paddleHeight, player.y));
             
-            // Computer AI - very easy, mostly misses
-            if (ball.dx > 0 && ball.x > canvas.width * 0.7) {  // Only when ball is close
-                // 85% chance to completely miss - just let it past
-                if (Math.random() > 0.15) {
-                    // Computer tries but terribly wrong direction
-                    const wrongDirection = Math.random() > 0.5 ? -100 : 100;
-                    computer.y += (computer.y + wrongDirection - computer.y) * 0.01;
-                }
+            // Computer AI - completely random until ball comes toward it
+            // ONLY reacts AFTER player hits ball toward computer
+            
+            if (ball.dx > 0 && ball.x > canvas.width * 0.5) {
+                // Ball is coming toward computer - NOW it tries to save
+                // But with delay and error
+                const reactionDelay = 0.15; // Only catch up 15% of the way
+                const targetY = ball.y - paddleHeight / 2;
+                computer.y += (targetY - computer.y) * reactionDelay;
+            } else {
+                // Ball going toward player OR not in play - move randomly
+                // Just gently sway up and down randomly
+                computer.y += (Math.random() - 0.5) * 2;
             }
             computer.y = Math.max(0, Math.min(canvas.height - paddleHeight, computer.y));
             
