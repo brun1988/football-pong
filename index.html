@@ -313,14 +313,17 @@
             player.y += (player.targetY - player.y) * 0.2;
             player.y = Math.max(0, Math.min(canvas.height - paddleHeight, player.y));
             
-            // Computer AI - only tracks when ball is moving toward computer
-            // Added delay and error margin for fair gameplay
-            if (ball.dx > 0) {  // Only react when ball coming toward computer
-                const targetY = ball.y - paddleHeight / 2;
-                // Slower tracking (0.04 vs 0.2 for player)
-                // Add random error to make it beatable
-                const errorMargin = (Math.random() - 0.5) * 30;
-                computer.y += (targetY + errorMargin - computer.y) * 0.04;
+            // Computer AI - very beatable with intentional mistakes
+            // Only reacts sometimes with slow, imperfect tracking
+            if (ball.dx > 0 && ball.x > canvas.width * 0.6) {  // Only when ball is past halfway
+                // 30% chance to completely miss the ball
+                if (Math.random() > 0.3) {
+                    const targetY = ball.y - paddleHeight / 2;
+                    // Very slow tracking (0.025 - much slower than player)
+                    const errorMargin = (Math.random() - 0.5) * 60;
+                    computer.y += (targetY + errorMargin - computer.y) * 0.025;
+                }
+                // Sometimes just stands still (70% chance)
             }
             computer.y = Math.max(0, Math.min(canvas.height - paddleHeight, computer.y));
             
